@@ -38,6 +38,10 @@ def get_top_headlines(country="us", max_articles=10):
         return []
 
     articles = response.json().get("articles", [])
+        # If no articles found, fallback to global news search (for general query)
+    if not articles:
+        st.warning(f"No top headlines found for {country}. Trying global news...")
+        return get_global_news(max_articles=max_articles)
     return articles
 
 
