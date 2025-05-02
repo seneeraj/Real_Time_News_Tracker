@@ -1,14 +1,18 @@
+import streamlit as st
 import requests
 from datetime import datetime
 import pytz
 
-API_KEY = "4181da22eab744a184f437a809dc9fd8"  # Replace with your actual NewsAPI key
+st.set_page_config(page_title="🗞️ Real-Time News Tracker", layout="wide")
+st.title("🗞️ Real-Time News Tracker")
+st.caption("Stay updated with the latest breaking news.")
+
+API_KEY = "4181da22eab744a184f437a809dc9fd8"  # Put this in secrets for security
 
 def get_news(query, max_articles):
     url = f"https://newsapi.org/v2/everything?q={query}&sortBy=publishedAt&language=en&pageSize={max_articles}&apiKey={API_KEY}"
     response = requests.get(url)
     if response.status_code != 200:
-        print(f"Error fetching news for '{query}': {response.status_code}")
         return []
     articles = response.json().get("articles", [])
     return [{
@@ -19,27 +23,22 @@ def get_news(query, max_articles):
         "description": a["description"]
     } for a in articles]
 
-def display_articles(topic, max_articles):
-    print(f"\n========== {topic.upper()} NEWS ==========")
+topics = st.multiselect("Choose topics", ["World News", "Stock Market", "US Dollar", "Politics", "Technology"], default=["Stock Market", "US Dollar"])
+max_articles = st.slider("Number of articles per topic", 1, 10, 5)
+
+for topic in topics:
+    st.subheader(f"📌 {topic} News")
     articles = get_news(topic, max_articles)
     if not articles:
-        print("⚠️ No news found or API limit exceeded.")
-        return
+        st.warning("No news found or API limit exceeded.")
+        continue
 
     for article in articles:
         pub_time = datetime.fromisoformat(article["published"].replace("Z", "+00:00"))
         pub_time = pub_time.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%b %d, %Y %I:%M %p")
-        print(f"\n🔹 {article['title']}")
-        print(f"   📰 {article['source']} • {pub_time}")
-        print(f"   📄 {article['description']}")
-        print(f"   🔗 {article['url']}")
 
-if __name__ == "__main__":
-    print("🗞️ Real-Time News Tracker (Console Edition)")
-    print("Stay updated with the latest breaking news.\n")
-
-    topics = ["World News","Stock Market", "US Dollar"]  # You can edit or expand this list
-    max_articles = 5  # You can change the number of articles per topic
-
-    for topic in topics:
-        display_articles(topic, max_articles)
+        with st.container():
+            st.markdown(f"### [{article['title']}]({article['url']})")
+            st.markdown(f"**{article['source']}** • _{pub_time}_")
+            st.markdown(f"{article['description']}")
+            st.markdown("---")
