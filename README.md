@@ -1,6 +1,6 @@
-# 🗞️ Real-Time News Tracker (Console Version)
+# 🗞️ Real-Time News Tracker
 
-This is a Python script to fetch and display the latest news using the NewsAPI.
+This is a Python script to fetch and display the latest news using the NewsAPI with the help of streamlit
 
 ## Features
 
